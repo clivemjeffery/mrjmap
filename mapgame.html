@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Year 4 Map Game Loader</title>
+    <script src="../dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var config = {
+        type: Phaser.AUTO,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                debug: false
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update,
+            resize: resize
+        }
+    };
+
+    var game = new Phaser.Game(config);
+
+    function preload ()
+    {
+        this.load.image('map', './map.png');
+        this.load.spritesheet('dude', './dude.png', { frameWidth: 32, frameHeight: 48 });
+    }
+
+    function create ()
+    {
+        this.cameras.main.setBounds(0, 0, 2400, 1800);
+        this.physics.world.setBounds(0, 0, 2400, 1800);
+        this.bg = this.add.image(1200, 900, 'map');
+        player = this.physics.add.sprite(100, 450, 'dude');
+
+        player.setCollideWorldBounds(true);
+        player.setMaxVelocity(200,200);
+        this.cameras.main.startFollow(player, true, 0.05, 0.05);
+
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'turn',
+            frames: [ { key: 'dude', frame: 4 } ],
+            frameRate: 20
+        });
+
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        //  Input Events
+        cursors = this.input.keyboard.createCursorKeys();
+        // Resize addEvents
+        this.events.on('resize', resize, this);
+    }
+
+    function update ()
+    {
+      vinc = 10;
+      if (cursors.left.isDown)
+      {
+          player.body.velocity.add(new Phaser.Math.Vector2(-vinc,0));
+          player.anims.play('left', true);
+      }
+      else if (cursors.right.isDown)
+      {
+          player.body.velocity.add(new Phaser.Math.Vector2(vinc,0));
+          player.anims.play('right', true);
+      }
+      if (cursors.up.isDown)
+      {
+          player.body.velocity.add(new Phaser.Math.Vector2(0,-vinc));
+      }
+      else if (cursors.down.isDown)
+      {
+          player.body.velocity.add(new Phaser.Math.Vector2(0,vinc));
+      }
+      if (cursors.space.isDown)
+      {
+        player.body.stop();
+        player.anims.play('turn', true);
+      }
+    }
+
+    function resize (width, height)
+    {
+      if (width === undefined) { width = this.sys.game.config.width; }
+      if (height === undefined) { height = this.sys.game.config.height; }
+      this.bg.setSize(width, height);
+      this.cameras.resize(width, height);
+    }
+
+    window.addEventListener('resize',
+      function (event) {
+        game.resize(window.innerWidth, window.innerHeight);
+      },
+      false
+    );
+
+</script>
+
+</body>
+</html>
